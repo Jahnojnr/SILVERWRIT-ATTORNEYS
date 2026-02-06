@@ -1,22 +1,4 @@
-
-        :root {
-            --primary-color: #8B0000; /* Dark red */
-            --secondary-color: #f8f9fa; /* Light gray */
-            --accent-color: #d4af37; /* Gold accent */
-            --text-dark: #222222;
-            --text-light: #5a5a5a;
-        }
-        
-        body {
-            font-family: 'Open Sans', sans-serif;
-            color: var(--text-dark);
-        }
-        
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Playfair Display', serif;
-            font-weight: 600;
-        }
-        /* Preloader Container */
+  /* Preloader Container */
 .preloader {
     position: fixed;
     top: 0;
@@ -505,6 +487,24 @@
         font-size: 0.8rem;
     }
 }
+        :root {
+            --primary-color: #8B0000; /* Dark red */
+            --secondary-color: #f8f9fa; /* Light gray */
+            --accent-color: #d4af37; /* Gold accent */
+            --text-dark: #222222;
+            --text-light: #5a5a5a;
+        }
+        
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: var(--text-dark);
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+        }
+      
         /* Header Styles */
         .navbar-brand {
             font-family: 'Playfair Display', serif;

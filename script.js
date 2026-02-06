@@ -1,5 +1,347 @@
   // Navbar scroll effect
-        window.addEventListener('scroll', function() {
+     // ===== Preloader Functionality =====
+document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
+    const preloader = document.getElementById('preloader');
+    const mainContent = document.getElementById('mainContent');
+    const skipButton = document.getElementById('skipButton');
+    const progressBar = document.getElementById('progressBar');
+    const progressPercentage = document.getElementById('progressPercentage');
+    const casesLoaded = document.getElementById('casesLoaded');
+    const clientsLoaded = document.getElementById('clientsLoaded');
+    const experienceLoaded = document.getElementById('experienceLoaded');
+    
+    // Quote slider elements
+    const quotes = document.querySelectorAll('.quote');
+    const quoteSlider = document.querySelector('.quote-slider');
+    
+    // Configuration
+    const config = {
+        minLoadingTime: 4000, // Minimum loading time in ms
+        maxLoadingTime: 7000, // Maximum loading time in ms
+        progressInterval: 50, // Progress update interval in ms
+        quoteChangeInterval: 3000, // Quote change interval in ms
+        animationCompleteDelay: 500 // Delay after animations complete
+    };
+    
+    // State variables
+    let progress = 0;
+    let currentQuoteIndex = 0;
+    let loadingComplete = false;
+    let startTime = Date.now();
+    
+    // Initialize the preloader
+    function initPreloader() {
+        // Start the loading simulation
+        simulateLoading();
+        
+        // Start the quote slider
+        startQuoteSlider();
+        
+        // Start the stats counter
+        startStatsCounter();
+        
+        // Add skip button event listener
+        skipButton.addEventListener('click', skipPreloader);
+        
+        // Add click/tap to skip functionality
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' || e.key === ' ') {
+                skipPreloader();
+            }
+        });
+        
+        // Optional: Add tap to skip on mobile
+        preloader.addEventListener('click', function(e) {
+            if (e.target === preloader) {
+                skipPreloader();
+            }
+        });
+    }
+    
+    // Simulate loading progress
+    function simulateLoading() {
+        const loadingTime = Math.random() * (config.maxLoadingTime - config.minLoadingTime) + config.minLoadingTime;
+        const progressSteps = loadingTime / config.progressInterval;
+        const progressIncrement = 100 / progressSteps;
+        
+        const progressInterval = setInterval(() => {
+            // Calculate time-based progress
+            const elapsedTime = Date.now() - startTime;
+            const timeProgress = Math.min((elapsedTime / loadingTime) * 100, 100);
+            
+            // Add some randomness to make it look more natural
+            const randomFactor = 1 + (Math.random() * 0.2 - 0.1); // +/- 10%
+            progress = Math.min(progress + (progressIncrement * randomFactor), timeProgress);
+            
+            // Update progress bar
+            updateProgress(progress);
+            
+            // Check if loading is complete
+            if (progress >= 100) {
+                clearInterval(progressInterval);
+                completeLoading();
+            }
+        }, config.progressInterval);
+    }
+    
+    // Update progress display
+    function updateProgress(value) {
+        const roundedValue = Math.min(Math.round(value), 100);
+        
+        // Update progress bar width
+        progressBar.style.width = `${roundedValue}%`;
+        
+        // Update percentage text
+        progressPercentage.textContent = `${roundedValue}%`;
+        
+        // Update loading message based on progress
+        updateLoadingMessage(roundedValue);
+    }
+    
+    // Update loading message based on progress
+    function updateLoadingMessage(progress) {
+        const messages = [
+            { threshold: 0, message: "Initializing Legal Systems" },
+            { threshold: 20, message: "Loading Case Database" },
+            { threshold: 40, message: "Preparing Legal Documents" },
+            { threshold: 60, message: "Consulting Legal Experts" },
+            { threshold: 80, message: "Finalizing Legal Strategies" },
+            { threshold: 95, message: "Ready to Serve Justice" }
+        ];
+        
+        // Find the appropriate message for current progress
+        let currentMessage = "Loading Legal Excellence";
+        for (let i = messages.length - 1; i >= 0; i--) {
+            if (progress >= messages[i].threshold) {
+                currentMessage = messages[i].message;
+                break;
+            }
+        }
+        
+        // Update the message if it's different
+        const messageElement = document.querySelector('.loading-message');
+        if (messageElement.textContent !== currentMessage) {
+            messageElement.textContent = currentMessage;
+            
+            // Add a subtle animation for message change
+            messageElement.style.opacity = '0';
+            setTimeout(() => {
+                messageElement.style.opacity = '1';
+                messageElement.style.transition = 'opacity 0.3s ease';
+            }, 10);
+        }
+    }
+    
+    // Start the quote slider
+    function startQuoteSlider() {
+        setInterval(() => {
+            // Move to next quote
+            quotes[currentQuoteIndex].classList.remove('active');
+            currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
+            quotes[currentQuoteIndex].classList.add('active');
+        }, config.quoteChangeInterval);
+    }
+    
+    // Start the stats counter
+    function startStatsCounter() {
+        const targetStats = {
+            cases: 850,
+            clients: 300,
+            experience: 15
+        };
+        
+        // Start counters when progress reaches 50%
+        const checkProgress = setInterval(() => {
+            if (progress >= 50) {
+                clearInterval(checkProgress);
+                animateCounter(casesLoaded, 0, targetStats.cases, 1500);
+                animateCounter(clientsLoaded, 0, targetStats.clients, 1800);
+                animateCounter(experienceLoaded, 0, targetStats.experience, 1200);
+            }
+        }, 100);
+    }
+    
+    // Animate counter from start to end
+    function animateCounter(element, start, end, duration) {
+        const startTime = Date.now();
+        const endTime = startTime + duration;
+        
+        function updateCounter() {
+            const now = Date.now();
+            const progress = Math.min((now - startTime) / duration, 1);
+            const easeProgress = easeOutCubic(progress);
+            const currentValue = Math.floor(start + (end - start) * easeProgress);
+            
+            // Format number with commas
+            element.textContent = currentValue.toLocaleString();
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateCounter);
+            }
+        }
+        
+        updateCounter();
+    }
+    
+    // Easing function for smooth animation
+    function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+    }
+    
+    // Complete the loading process
+    function completeLoading() {
+        if (loadingComplete) return;
+        loadingComplete = true;
+        
+        // Ensure progress shows 100%
+        updateProgress(100);
+        
+        // Wait for animations to complete
+        setTimeout(() => {
+            // Add fade-out animation to preloader
+            preloader.classList.add('fade-out');
+            
+            // Show main content after preloader fades out
+            setTimeout(() => {
+                preloader.style.display = 'none';
+                mainContent.style.display = 'block';
+                
+                // Trigger any post-loading actions
+                onContentLoaded();
+            }, 800);
+        }, config.animationCompleteDelay);
+    }
+    
+    // Skip preloader manually
+    function skipPreloader() {
+        if (loadingComplete) return;
+        
+        // Jump to 100% progress
+        progress = 100;
+        updateProgress(progress);
+        
+        // Complete loading immediately
+        completeLoading();
+        
+        // Add visual feedback for skip
+        skipButton.innerHTML = '<i class="fas fa-check"></i> Skipped';
+        skipButton.style.backgroundColor = 'rgba(139, 0, 0, 0.6)';
+        skipButton.style.color = 'white';
+        skipButton.disabled = true;
+    }
+    
+    // Function called when content is loaded
+    function onContentLoaded() {
+        console.log('Website content fully loaded');
+        
+        // Dispatch custom event for other scripts to listen to
+        document.dispatchEvent(new CustomEvent('preloaderComplete'));
+        
+        // Add any post-loading animations or effects to main content
+        animateMainContent();
+    }
+    
+    // Animate main content entrance
+    function animateMainContent() {
+        const elements = mainContent.querySelectorAll('h1, p, button');
+        elements.forEach((element, index) => {
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(20px)';
+            element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            
+            setTimeout(() => {
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            }, 100 + (index * 100));
+        });
+    }
+    
+    // Function to show preloader again (for testing/demo)
+    window.showPreloaderAgain = function() {
+        // Reset state
+        progress = 0;
+        loadingComplete = false;
+        startTime = Date.now();
+        
+        // Reset displays
+        progressBar.style.width = '0%';
+        progressPercentage.textContent = '0%';
+        casesLoaded.textContent = '0';
+        clientsLoaded.textContent = '0';
+        experienceLoaded.textContent = '0';
+        
+        // Reset animations
+        const elements = document.querySelectorAll('.logo-svg circle, .logo-svg path, .logo-svg line');
+        elements.forEach(element => {
+            element.style.animation = 'none';
+            void element.offsetWidth; // Trigger reflow
+            element.style.animation = '';
+        });
+        
+        // Reset text animations
+        document.querySelector('.silver').style.animation = 'none';
+        document.querySelector('.attorneys').style.animation = 'none';
+        document.querySelector('.firm-tagline').style.animation = 'none';
+        document.querySelectorAll('.tagline-line').forEach(line => {
+            line.style.animation = 'none';
+        });
+        document.querySelectorAll('.dot').forEach(dot => {
+            dot.style.animation = 'none';
+        });
+        document.querySelector('.loading-message').style.animation = 'none';
+        document.querySelector('.progress-percentage').style.animation = 'none';
+        document.querySelectorAll('.stat-item').forEach(item => {
+            item.style.animation = 'none';
+        });
+        document.querySelector('.skip-button').style.animation = 'none';
+        
+        // Reset quotes
+        quotes.forEach(quote => quote.classList.remove('active'));
+        quotes[0].classList.add('active');
+        currentQuoteIndex = 0;
+        
+        // Reset skip button
+        skipButton.innerHTML = 'Skip Intro <i class="fas fa-forward"></i>';
+        skipButton.style.backgroundColor = '';
+        skipButton.style.color = '';
+        skipButton.disabled = false;
+        
+        // Show preloader, hide main content
+        preloader.style.display = 'flex';
+        preloader.classList.remove('fade-out');
+        mainContent.style.display = 'none';
+        
+        // Reinitialize
+        setTimeout(() => {
+            void document.querySelector('.logo-svg').offsetWidth; // Force reflow
+            initPreloader();
+        }, 100);
+    };
+    
+    // Start the preloader
+    initPreloader();
+    
+    // Optional: Add loading of actual resources
+    window.addEventListener('load', function() {
+        // This ensures the preloader waits for all page resources
+        // In a real implementation, you might want to check specific resources
+        console.log('All page resources loaded');
+    });
+});
+
+// Export functions if using modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        initPreloader: function() {
+            // Initialize preloader
+            console.log('Preloader module loaded');
+        }
+    };
+}
+  
+  
+  window.addEventListener('scroll', function() {
             const navbar = document.querySelector('.navbar');
             if (window.scrollY > 50) {
                 navbar.classList.add('scrolled');
@@ -976,343 +1318,3 @@ if (typeof module !== 'undefined' && module.exports) {
     };
 }
 
-// ===== Preloader Functionality =====
-document.addEventListener('DOMContentLoaded', function() {
-    // DOM Elements
-    const preloader = document.getElementById('preloader');
-    const mainContent = document.getElementById('mainContent');
-    const skipButton = document.getElementById('skipButton');
-    const progressBar = document.getElementById('progressBar');
-    const progressPercentage = document.getElementById('progressPercentage');
-    const casesLoaded = document.getElementById('casesLoaded');
-    const clientsLoaded = document.getElementById('clientsLoaded');
-    const experienceLoaded = document.getElementById('experienceLoaded');
-    
-    // Quote slider elements
-    const quotes = document.querySelectorAll('.quote');
-    const quoteSlider = document.querySelector('.quote-slider');
-    
-    // Configuration
-    const config = {
-        minLoadingTime: 4000, // Minimum loading time in ms
-        maxLoadingTime: 7000, // Maximum loading time in ms
-        progressInterval: 50, // Progress update interval in ms
-        quoteChangeInterval: 3000, // Quote change interval in ms
-        animationCompleteDelay: 500 // Delay after animations complete
-    };
-    
-    // State variables
-    let progress = 0;
-    let currentQuoteIndex = 0;
-    let loadingComplete = false;
-    let startTime = Date.now();
-    
-    // Initialize the preloader
-    function initPreloader() {
-        // Start the loading simulation
-        simulateLoading();
-        
-        // Start the quote slider
-        startQuoteSlider();
-        
-        // Start the stats counter
-        startStatsCounter();
-        
-        // Add skip button event listener
-        skipButton.addEventListener('click', skipPreloader);
-        
-        // Add click/tap to skip functionality
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' || e.key === ' ') {
-                skipPreloader();
-            }
-        });
-        
-        // Optional: Add tap to skip on mobile
-        preloader.addEventListener('click', function(e) {
-            if (e.target === preloader) {
-                skipPreloader();
-            }
-        });
-    }
-    
-    // Simulate loading progress
-    function simulateLoading() {
-        const loadingTime = Math.random() * (config.maxLoadingTime - config.minLoadingTime) + config.minLoadingTime;
-        const progressSteps = loadingTime / config.progressInterval;
-        const progressIncrement = 100 / progressSteps;
-        
-        const progressInterval = setInterval(() => {
-            // Calculate time-based progress
-            const elapsedTime = Date.now() - startTime;
-            const timeProgress = Math.min((elapsedTime / loadingTime) * 100, 100);
-            
-            // Add some randomness to make it look more natural
-            const randomFactor = 1 + (Math.random() * 0.2 - 0.1); // +/- 10%
-            progress = Math.min(progress + (progressIncrement * randomFactor), timeProgress);
-            
-            // Update progress bar
-            updateProgress(progress);
-            
-            // Check if loading is complete
-            if (progress >= 100) {
-                clearInterval(progressInterval);
-                completeLoading();
-            }
-        }, config.progressInterval);
-    }
-    
-    // Update progress display
-    function updateProgress(value) {
-        const roundedValue = Math.min(Math.round(value), 100);
-        
-        // Update progress bar width
-        progressBar.style.width = `${roundedValue}%`;
-        
-        // Update percentage text
-        progressPercentage.textContent = `${roundedValue}%`;
-        
-        // Update loading message based on progress
-        updateLoadingMessage(roundedValue);
-    }
-    
-    // Update loading message based on progress
-    function updateLoadingMessage(progress) {
-        const messages = [
-            { threshold: 0, message: "Initializing Legal Systems" },
-            { threshold: 20, message: "Loading Case Database" },
-            { threshold: 40, message: "Preparing Legal Documents" },
-            { threshold: 60, message: "Consulting Legal Experts" },
-            { threshold: 80, message: "Finalizing Legal Strategies" },
-            { threshold: 95, message: "Ready to Serve Justice" }
-        ];
-        
-        // Find the appropriate message for current progress
-        let currentMessage = "Loading Legal Excellence";
-        for (let i = messages.length - 1; i >= 0; i--) {
-            if (progress >= messages[i].threshold) {
-                currentMessage = messages[i].message;
-                break;
-            }
-        }
-        
-        // Update the message if it's different
-        const messageElement = document.querySelector('.loading-message');
-        if (messageElement.textContent !== currentMessage) {
-            messageElement.textContent = currentMessage;
-            
-            // Add a subtle animation for message change
-            messageElement.style.opacity = '0';
-            setTimeout(() => {
-                messageElement.style.opacity = '1';
-                messageElement.style.transition = 'opacity 0.3s ease';
-            }, 10);
-        }
-    }
-    
-    // Start the quote slider
-    function startQuoteSlider() {
-        setInterval(() => {
-            // Move to next quote
-            quotes[currentQuoteIndex].classList.remove('active');
-            currentQuoteIndex = (currentQuoteIndex + 1) % quotes.length;
-            quotes[currentQuoteIndex].classList.add('active');
-        }, config.quoteChangeInterval);
-    }
-    
-    // Start the stats counter
-    function startStatsCounter() {
-        const targetStats = {
-            cases: 850,
-            clients: 300,
-            experience: 15
-        };
-        
-        // Start counters when progress reaches 50%
-        const checkProgress = setInterval(() => {
-            if (progress >= 50) {
-                clearInterval(checkProgress);
-                animateCounter(casesLoaded, 0, targetStats.cases, 1500);
-                animateCounter(clientsLoaded, 0, targetStats.clients, 1800);
-                animateCounter(experienceLoaded, 0, targetStats.experience, 1200);
-            }
-        }, 100);
-    }
-    
-    // Animate counter from start to end
-    function animateCounter(element, start, end, duration) {
-        const startTime = Date.now();
-        const endTime = startTime + duration;
-        
-        function updateCounter() {
-            const now = Date.now();
-            const progress = Math.min((now - startTime) / duration, 1);
-            const easeProgress = easeOutCubic(progress);
-            const currentValue = Math.floor(start + (end - start) * easeProgress);
-            
-            // Format number with commas
-            element.textContent = currentValue.toLocaleString();
-            
-            if (progress < 1) {
-                requestAnimationFrame(updateCounter);
-            }
-        }
-        
-        updateCounter();
-    }
-    
-    // Easing function for smooth animation
-    function easeOutCubic(t) {
-        return 1 - Math.pow(1 - t, 3);
-    }
-    
-    // Complete the loading process
-    function completeLoading() {
-        if (loadingComplete) return;
-        loadingComplete = true;
-        
-        // Ensure progress shows 100%
-        updateProgress(100);
-        
-        // Wait for animations to complete
-        setTimeout(() => {
-            // Add fade-out animation to preloader
-            preloader.classList.add('fade-out');
-            
-            // Show main content after preloader fades out
-            setTimeout(() => {
-                preloader.style.display = 'none';
-                mainContent.style.display = 'block';
-                
-                // Trigger any post-loading actions
-                onContentLoaded();
-            }, 800);
-        }, config.animationCompleteDelay);
-    }
-    
-    // Skip preloader manually
-    function skipPreloader() {
-        if (loadingComplete) return;
-        
-        // Jump to 100% progress
-        progress = 100;
-        updateProgress(progress);
-        
-        // Complete loading immediately
-        completeLoading();
-        
-        // Add visual feedback for skip
-        skipButton.innerHTML = '<i class="fas fa-check"></i> Skipped';
-        skipButton.style.backgroundColor = 'rgba(139, 0, 0, 0.6)';
-        skipButton.style.color = 'white';
-        skipButton.disabled = true;
-    }
-    
-    // Function called when content is loaded
-    function onContentLoaded() {
-        console.log('Website content fully loaded');
-        
-        // Dispatch custom event for other scripts to listen to
-        document.dispatchEvent(new CustomEvent('preloaderComplete'));
-        
-        // Add any post-loading animations or effects to main content
-        animateMainContent();
-    }
-    
-    // Animate main content entrance
-    function animateMainContent() {
-        const elements = mainContent.querySelectorAll('h1, p, button');
-        elements.forEach((element, index) => {
-            element.style.opacity = '0';
-            element.style.transform = 'translateY(20px)';
-            element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            
-            setTimeout(() => {
-                element.style.opacity = '1';
-                element.style.transform = 'translateY(0)';
-            }, 100 + (index * 100));
-        });
-    }
-    
-    // Function to show preloader again (for testing/demo)
-    window.showPreloaderAgain = function() {
-        // Reset state
-        progress = 0;
-        loadingComplete = false;
-        startTime = Date.now();
-        
-        // Reset displays
-        progressBar.style.width = '0%';
-        progressPercentage.textContent = '0%';
-        casesLoaded.textContent = '0';
-        clientsLoaded.textContent = '0';
-        experienceLoaded.textContent = '0';
-        
-        // Reset animations
-        const elements = document.querySelectorAll('.logo-svg circle, .logo-svg path, .logo-svg line');
-        elements.forEach(element => {
-            element.style.animation = 'none';
-            void element.offsetWidth; // Trigger reflow
-            element.style.animation = '';
-        });
-        
-        // Reset text animations
-        document.querySelector('.silver').style.animation = 'none';
-        document.querySelector('.attorneys').style.animation = 'none';
-        document.querySelector('.firm-tagline').style.animation = 'none';
-        document.querySelectorAll('.tagline-line').forEach(line => {
-            line.style.animation = 'none';
-        });
-        document.querySelectorAll('.dot').forEach(dot => {
-            dot.style.animation = 'none';
-        });
-        document.querySelector('.loading-message').style.animation = 'none';
-        document.querySelector('.progress-percentage').style.animation = 'none';
-        document.querySelectorAll('.stat-item').forEach(item => {
-            item.style.animation = 'none';
-        });
-        document.querySelector('.skip-button').style.animation = 'none';
-        
-        // Reset quotes
-        quotes.forEach(quote => quote.classList.remove('active'));
-        quotes[0].classList.add('active');
-        currentQuoteIndex = 0;
-        
-        // Reset skip button
-        skipButton.innerHTML = 'Skip Intro <i class="fas fa-forward"></i>';
-        skipButton.style.backgroundColor = '';
-        skipButton.style.color = '';
-        skipButton.disabled = false;
-        
-        // Show preloader, hide main content
-        preloader.style.display = 'flex';
-        preloader.classList.remove('fade-out');
-        mainContent.style.display = 'none';
-        
-        // Reinitialize
-        setTimeout(() => {
-            void document.querySelector('.logo-svg').offsetWidth; // Force reflow
-            initPreloader();
-        }, 100);
-    };
-    
-    // Start the preloader
-    initPreloader();
-    
-    // Optional: Add loading of actual resources
-    window.addEventListener('load', function() {
-        // This ensures the preloader waits for all page resources
-        // In a real implementation, you might want to check specific resources
-        console.log('All page resources loaded');
-    });
-});
-
-// Export functions if using modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        initPreloader: function() {
-            // Initialize preloader
-            console.log('Preloader module loaded');
-        }
-    };
-}
